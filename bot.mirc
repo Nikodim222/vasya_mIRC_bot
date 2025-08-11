@@ -1,0 +1,170 @@
+' Бот
+' автор: Ефремов А. В.; nspu@list.ru
+
+on *:JOIN:#: {
+  var %c = 0
+  var %z = 0
+  if ($lower($nick) == $lower($me)) {
+' если вошёл на канал сам бот
+    chanserv op $chan
+    msg $chan $read C:\PROGRA~1\MIRC\BOT_IRC\words\allhi.txt | timer2 off
+    echo Вы используете mIRC [ $version ].
+    echo $time
+    return
+  }
+' если вошёл на канал кто-то другой
+    if (%z < 1) {
+    msg $chan $read C:\PROGRA~1\MIRC\BOT_IRC\words\welcome.txt
+    return
+    }
+}
+
+on *:PART:#: {
+  if ($lower($nick) == $lower($me)) {
+'  если с канала уходит сам бот
+   msg $chan Всем пока! Я ухожу.
+   return
+   }
+' если с канала уходит кто-то другой
+    msg $chan $read C:\PROGRA~1\MIRC\BOT_IRC\words\by.txt
+    return
+}
+
+on 1:TEXT:*!help*:#: {
+    if (%z < 1) {
+    privmsg $nick Команды:
+    privmsg $nick !help - справка
+    privmsg $nick !time - время
+    privmsg $nick !topic название_темы  - установка темы на канале (бот - оп)
+    privmsg $nick !go #имя_канала - зайти на канал
+    privmsg $nick ник_бота : !fuck - уйти с текущего канала
+    privmsg $nick !kick ник - кикнуть юзера (бот - оп)
+    privmsg $nick !op - дать опа боту
+    privmsg $nick !deop - забрать опа у бота
+    privmsg $nick !shut - бот молчит/говорит на канале
+    %c = 0
+    return
+    }
+}
+
+on 1:TEXT:*!time*:#: {
+    msg # $time
+    %c = 0
+}
+
+on 1:TEXT:*!shut*:#: {
+    if (%z < 1) {
+      %z = 1
+      msg # Молчу! :)
+      return
+    }
+    if ($lower($nick) == Nikodim) {
+         %z = 0
+         msg # Говорю! :)
+    }
+}
+
+on 1:TEXT:*!op*:#: {
+    chanserv op $chan
+}
+
+on 1:TEXT:*!deop*:#: {
+    chanserv deop $chan
+}
+
+on 1:TEXT:*:#: {
+var %i
+var %i2
+var %i3
+var %i4
+var %x1
+var %x2
+
+if ($lower($1) == !kick) {
+      if ($lower($2) == $lower($me)) {
+           msg $chan $read C:\PROGRA~1\MIRC\BOT_IRC\words\fuckoff.txt
+           return
+      }
+           msg $chan $read C:\PROGRA~1\MIRC\BOT_IRC\words\goaway.txt
+           kick $chan $nick
+      return
+}
+
+if (($lower($me) isin $lower($1-)) && (!fuck isin $lower($1-))) {
+   %i2 = $lines(C:\PROGRA~1\MIRC\BOT_IRC\words\chans.txt)
+   %i = 0
+   while (%i < %i2) {
+     inc %i
+     %i3 = $read -l %i C:\PROGRA~1\MIRC\BOT_IRC\words\chans.txt
+     if ($chan == %i3) {
+       msg $chan $read C:\PROGRA~1\MIRC\BOT_IRC\words\fuckoff.txt
+       return
+     }
+   }
+   msg $chan пока!
+   part $chan
+   return
+}
+
+if ($lower($1) == !goes) {
+msg $chan Я щас ещё и на канале $2 :-)
+join $2
+return
+}
+
+if ($lower($1) == !topic) {
+  topic $chan $2-
+  return
+}
+
+if (($lower($me $+ $chr(58)) isin $lower($1-)) || ($lower($1) == $lower($me)) || ($lower($1) == $lower($me $+ $chr(44))) || ($lower($chr(32) $+ $me $+ $chr(32)) isin $lower($1-)) || ($lower($chr(32) $+ $me $+ $chr(44)) isin $lower($1-)) || ($lower($chr(44) $+ $me $+ $chr(44)) isin $lower($1-)) || ($lower($chr(44) $+ $me $+ $chr(32)) isin $lower($1-))) {
+  if (%z < 1) {
+     msg $chan $read C:\PROGRA~1\MIRC\BOT_IRC\words\what.txt
+  }
+  return
+}
+
+inc %c
+if (%c > 20) {
+  %c = 0
+  if (%z < 1) {
+    msg $chan $read C:\PROGRA~1\MIRC\BOT_IRC\words\mats.txt
+  }
+  return
+}
+
+%i2 = $lines(C:\PROGRA~1\MIRC\BOT_IRC\words\mats2.txt)
+%i = 0
+while (%i < %i2) {
+    inc %i
+    %i3 = $read -l %i C:\PROGRA~1\MIRC\BOT_IRC\words\mats2.txt
+    %x1 = 31
+    while (%x1 < 46) {
+        inc %x1
+        if (($lower(%i3 $+ $chr(%x1)) isin $lower($1-)) || ($lower($chr(%x1) $+ %i3) isin $lower($1-))) {
+            %i4 = $read C:\PROGRA~1\MIRC\BOT_IRC\words\whymatU.txt
+            if ($chr(47) $+ notice isin $mid(%i4, 1, 7)) {
+                notice # $mid(%i4, 9)
+                return
+            }
+            msg # %i4
+            return
+        }
+        %x2 = 31
+        while (%x2 < 46) {
+            inc %x2
+            if ($lower($chr(%x1) $+ %i3 $+ $chr(%x2)) isin $lower($1-)) {
+                %i4 = $read C:\PROGRA~1\MIRC\BOT_IRC\words\whymatU.txt
+                if ($lower($chr(47) $+ notice) isin $lower($mid(%i4, 1, 7))) {
+                    notice # $mid(%i4, 9)
+                    return
+                }
+                msg # %i4
+                return
+            }
+        }
+    }
+}
+
+
+}
